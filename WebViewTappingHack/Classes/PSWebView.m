@@ -24,7 +24,7 @@ static const char* kUIWebDocumentView = "UIWebDocumentView";
 {
 	[self __touchesEnded:touches withEvent:event];
 	
-	PSWebView* webView = (PSWebView*)[[self superview] superview];
+	id webView = [[self superview] superview];
 	if (touches.count > 1) {
 		if ([webView respondsToSelector:@selector(fireZoomingEndedWithTouches:event:)]) {
 			[webView fireZoomingEndedWithTouches:touches event:event];
