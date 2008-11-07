@@ -1,7 +1,7 @@
 #import <objc/objc-runtime.h>
 #import "PSWebView.h"
 
-const char* kUIWebDocumentView = "UIWebDocumentView";
+static const char* kUIWebDocumentView = "UIWebDocumentView";
 
 @interface NSObject (UIWebViewTappingDelegate)
 - (void)webView:(UIWebView*)sender zoomingEndedWithTouches:(NSSet*)touches event:(UIEvent*)event;
@@ -15,6 +15,8 @@ const char* kUIWebDocumentView = "UIWebDocumentView";
 
 @implementation UIView (__TapHook)
 
+static BOOL tappingHookInstalled = NO;
+
 - (void)__touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event
 {
 	// dummy implementation
@@ -26,10 +28,14 @@ const char* kUIWebDocumentView = "UIWebDocumentView";
 	
 	PSWebView* webView = (PSWebView*)[[self superview] superview];
 	if (touches.count > 1) {
-		[webView fireZoomingEndedWithTouches:touches event:event];
+		if ([webView respondsToSelector:@selector(fireZoomingEndedWithTouches:event:)]) {
+			[webView fireZoomingEndedWithTouches:touches event:event];
+		}
 	}
 	else {
-		[webView fireTappedWithTouch:[touches anyObject] event:event];
+		if ([webView respondsToSelector:@selector(fireTappedWithTouch:event:)]) {
+			[webView fireTappedWithTouch:[touches anyObject] event:event];
+		}
 	}
 }
 
@@ -37,14 +43,18 @@ const char* kUIWebDocumentView = "UIWebDocumentView";
 
 static void installHook(UIView* view)
 {
+	if (tappingHookInstalled) return;
+	
+	tappingHookInstalled = YES;
+	
 	Class klass = [view class];
 	
-	Method target_method = class_getInstanceMethod(klass, @selector(touchesEnded:withEvent:));
-	Method alias_method = class_getInstanceMethod(klass, @selector(__touchesEnded:withEvent:));
-	Method new_method = class_getInstanceMethod(klass, @selector(__myTouchesEnded:withEvent:));
+	Method targetMethod = class_getInstanceMethod(klass, @selector(touchesEnded:withEvent:));
+	Method aliasMethod = class_getInstanceMethod(klass, @selector(__touchesEnded:withEvent:));
+	Method newMethod = class_getInstanceMethod(klass, @selector(__myTouchesEnded:withEvent:));
 	
-	method_setImplementation(alias_method, method_getImplementation(target_method));
-	method_setImplementation(target_method, method_getImplementation(new_method));
+	method_setImplementation(aliasMethod, method_getImplementation(targetMethod));
+	method_setImplementation(targetMethod, method_getImplementation(newMethod));
 }
 
 @implementation PSWebView
