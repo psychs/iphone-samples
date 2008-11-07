@@ -15,8 +15,6 @@ static const char* kUIWebDocumentView = "UIWebDocumentView";
 
 @implementation UIView (__TapHook)
 
-static BOOL tappingHookInstalled = NO;
-
 - (void)__touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event
 {
 	// dummy implementation
@@ -40,6 +38,8 @@ static BOOL tappingHookInstalled = NO;
 }
 
 @end
+
+static BOOL tappingHookInstalled = NO;
 
 static void installHook(UIView* view)
 {
