@@ -64,7 +64,7 @@ static void installHook(UIView* view)
 	NSArray* views = [[[self subviews] objectAtIndex:0] subviews];
 	for (id view in views) {
 		const char* name = object_getClassName(view);
-		if (!strncmp(name, kUIWebDocumentView, strlen(name))) {
+		if (!strcmp(name, kUIWebDocumentView)) {
 			installHook(view);
 			break;
 		}
