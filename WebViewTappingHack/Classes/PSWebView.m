@@ -39,13 +39,13 @@ static const char* kUIWebDocumentView = "UIWebDocumentView";
 
 @end
 
-static BOOL tappingHookInstalled = NO;
+static BOOL hookInstalled = NO;
 
 static void installHook(UIView* view)
 {
-	if (tappingHookInstalled) return;
+	if (hookInstalled) return;
 	
-	tappingHookInstalled = YES;
+	hookInstalled = YES;
 	
 	Class klass = [view class];
 	
