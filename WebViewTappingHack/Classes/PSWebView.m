@@ -1,8 +1,6 @@
 #import <objc/runtime.h>
 #import "PSWebView.h"
 
-static const char* kUIWebDocumentView = "UIWebDocumentView";
-
 @interface NSObject (UIWebViewTappingDelegate)
 - (void)webView:(UIWebView*)sender zoomingEndedWithTouches:(NSSet*)touches event:(UIEvent*)event;
 - (void)webView:(UIWebView*)sender tappedWithTouch:(UITouch*)touch event:(UIEvent*)event;
@@ -41,13 +39,13 @@ static const char* kUIWebDocumentView = "UIWebDocumentView";
 
 static BOOL hookInstalled = NO;
 
-static void installHook(UIView* view)
+static void installHook()
 {
 	if (hookInstalled) return;
 	
 	hookInstalled = YES;
 	
-	Class klass = [view class];
+	Class klass = objc_getClass("UIWebDocumentView");
 	
 	Method targetMethod = class_getInstanceMethod(klass, @selector(touchesEnded:withEvent:));
 	Method aliasMethod = class_getInstanceMethod(klass, @selector(__touchesEnded:withEvent:));
@@ -59,22 +57,10 @@ static void installHook(UIView* view)
 
 @implementation PSWebView
 
-- (void)setUp
-{
-	NSArray* views = [[[self subviews] objectAtIndex:0] subviews];
-	for (id view in views) {
-		const char* name = object_getClassName(view);
-		if (!strcmp(name, kUIWebDocumentView)) {
-			installHook(view);
-			break;
-		}
-	}
-}
-
 - (id)initWithCoder:(NSCoder*)coder
 {
     if (self = [super initWithCoder:coder]) {
-		[self setUp];
+		installHook();
     }
     return self;
 }
@@ -82,7 +68,7 @@ static void installHook(UIView* view)
 - (id)initWithFrame:(CGRect)frame
 {
     if (self = [super initWithFrame:frame]) {
-		[self setUp];
+		installHook();
     }
     return self;
 }
