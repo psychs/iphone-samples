@@ -15,11 +15,6 @@
 
 - (void)__touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event
 {
-	// dummy implementation
-}
-
-- (void)__myTouchesEnded:(NSSet*)touches withEvent:(UIEvent*)event
-{
 	[self __touchesEnded:touches withEvent:event];
 	
 	id webView = [[self superview] superview];
@@ -46,13 +41,9 @@ static void installHook()
 	hookInstalled = YES;
 	
 	Class klass = objc_getClass("UIWebDocumentView");
-	
 	Method targetMethod = class_getInstanceMethod(klass, @selector(touchesEnded:withEvent:));
-	Method aliasMethod = class_getInstanceMethod(klass, @selector(__touchesEnded:withEvent:));
-	Method newMethod = class_getInstanceMethod(klass, @selector(__myTouchesEnded:withEvent:));
-	
-	method_setImplementation(aliasMethod, method_getImplementation(targetMethod));
-	method_setImplementation(targetMethod, method_getImplementation(newMethod));
+	Method newMethod = class_getInstanceMethod(klass, @selector(__touchesEnded:withEvent:));
+	method_exchangeImplementations(targetMethod, newMethod);
 }
 
 @implementation PSWebView
