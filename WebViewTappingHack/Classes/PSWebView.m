@@ -1,4 +1,4 @@
-#import <objc/objc-runtime.h>
+#import <objc/runtime.h>
 #import "PSWebView.h"
 
 static const char* kUIWebDocumentView = "UIWebDocumentView";
